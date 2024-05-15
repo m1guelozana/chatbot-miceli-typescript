@@ -8,6 +8,10 @@ export async function initializeWhatsAppClient() {
     authStrategy: new LocalAuth(),
     puppeteer: {
       headless: false,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox"
+      ]
     }
   });
 
@@ -20,15 +24,9 @@ export async function initializeWhatsAppClient() {
   });
 
   client.on('first_message', async (message) => {
-    const chat = await message.getChat();
-    await chat.sendStateTyping();
     console.log(`Received message: ${message.body}`);
-    if (message.type.toLowerCase() == "e2e_notification") return null;
-    else if (message.type.toLowerCase() == "ciphertext") return null;
-    else if (message.body === "") return null;
-    else if (message.body !== null) {
-      await handleUserFirstMessage(client, message);
-    }  
+    if (!message.body || message.type.toLowerCase() == "e2e_notification" || message.type.toLowerCase() == "ciphertext") return null;
+    await handleUserFirstMessage(client, message);
   });
 
   await client.initialize();
