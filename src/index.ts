@@ -19,6 +19,8 @@ client.on('ready', () => {
 });
 
 client.on('first_message', async (message) => {
+  const chat = await message.getChat();
+  await chat.sendStateTyping();
   console.log(`Received message: ${message.body}`);
   if (message.type.toLowerCase() == "e2e_notification") return null;
   else if (message.type.toLowerCase() == "ciphertext") return null;
