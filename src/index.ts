@@ -18,9 +18,14 @@ client.on('ready', () => {
   console.log('Client is ready!');
 });
 
-client.on('message', async (message) => {
+client.on('first_message', async (message) => {
   console.log(`Received message: ${message.body}`);
-  await handleUserFirstMessage(client, message);
+  if (message.type.toLowerCase() == "e2e_notification") return null;
+  else if (message.type.toLowerCase() == "ciphertext") return null;
+  else if (message.body === "") return null;
+  else if (message.body !== null) {
+    await handleUserFirstMessage(client, message);
+  }  
 });
 
 client.initialize();
