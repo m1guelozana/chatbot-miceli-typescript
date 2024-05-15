@@ -1,7 +1,7 @@
 // src/whatsapp/index.ts
 import { Client, LocalAuth } from 'whatsapp-web.js';
 import qrcode from 'qrcode-terminal';
-import handleUserFirstMessage from '../messages/first-message';
+import handleUserFirstMessage from './messages/first-message';
 
 export async function initializeWhatsAppClient() {
   const client = new Client({
