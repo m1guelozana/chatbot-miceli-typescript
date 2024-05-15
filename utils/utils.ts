@@ -1,4 +1,3 @@
-// utils/utils.ts
 import { Chat, Message } from "whatsapp-web.js";
 
 export async function waitForUserChoice(chat: Chat): Promise<string> {

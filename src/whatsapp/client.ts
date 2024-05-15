@@ -1,7 +1,6 @@
-// src/whatsapp/index.ts
-import { Client, LocalAuth } from "whatsapp-web.js";
-import qrcode from "qrcode-terminal";
-import handleUserFirstMessage from "./messages/first-message";
+import { Client, LocalAuth } from 'whatsapp-web.js';
+import qrcode from 'qrcode-terminal';
+import handleUserFirstMessage from './messages/first-message';
 
 export async function initializeWhatsAppClient() {
   try {
@@ -14,6 +13,7 @@ export async function initializeWhatsAppClient() {
     });
 
     client.on("qr", (qr) => {
+      console.log("QR RECEIVED", qr);
       qrcode.generate(qr, { small: true });
     });
 
@@ -27,12 +27,11 @@ export async function initializeWhatsAppClient() {
         !message.body ||
         message.type.toLowerCase() == "e2e_notification" ||
         message.type.toLowerCase() == "ciphertext"
-      )
-        return null;
+      ) {
+        console.log("Ignored message type or empty message");
+        return;
+      }
       await handleUserFirstMessage(client, message);
-      // if (message.body === '!ping') {
-      //   client.sendMessage(message.from, 'pong');
-      // }
     });
 
     await client.initialize();
