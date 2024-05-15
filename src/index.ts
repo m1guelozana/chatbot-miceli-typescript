@@ -1,33 +1,23 @@
 // src/index.ts
-import { Client, LocalAuth } from 'whatsapp-web.js';
-import qrcode from 'qrcode-terminal';
-import handleUserFirstMessage from './messages/first-message'
+import express from 'express';
+import { initializeWhatsAppClient } from './whatsapp/client';
 
-const client = new Client({
-  authStrategy: new LocalAuth(),
-  puppeteer: {
-    headless: false,
-  }
+const app = express();
+const port = 3000;
+
+initializeWhatsAppClient().then(client => {
+  console.log('WhatsApp client initialized successfully!');
+  client.on('message', message => {
+    console.log(`Received message from ${message.from}: ${message.body}`);
+  });
+}).catch(error => {
+  console.error('Error initializing WhatsApp client:', error);
 });
 
-client.on('qr', (qr) => {
-  qrcode.generate(qr, { small: true });
+app.get('/', (req, res) =>{
+  res.send('')
 });
 
-client.on('ready', () => {
-  console.log('Client is ready!');
+app.listen(port, () => {
+  console.log(`Server running on: http://localhost:${port}`)
 });
-
-client.on('first_message', async (message) => {
-  const chat = await message.getChat();
-  await chat.sendStateTyping();
-  console.log(`Received message: ${message.body}`);
-  if (message.type.toLowerCase() == "e2e_notification") return null;
-  else if (message.type.toLowerCase() == "ciphertext") return null;
-  else if (message.body === "") return null;
-  else if (message.body !== null) {
-    await handleUserFirstMessage(client, message);
-  }  
-});
-
-client.initialize();
