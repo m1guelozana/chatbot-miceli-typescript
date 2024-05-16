@@ -1,14 +1,20 @@
 import express from 'express';
 import { initializeWhatsAppClient } from './whatsapp/client';
+import handleUserFirstMessage from './whatsapp/messages/first-message';
 
 const app = express();
 const port = 3000;
 
 initializeWhatsAppClient().then(client => {
-  console.log('WhatsApp client initialized successfully!');
-  app.listen(port, () => {
-    console.log(`Server running on: http://localhost:${port}`);
+    console.log('WhatsApp client initialized successfully!');
+  }).catch(error => { 
+    console.error('Error initializing WhatsApp client:', error);
   });
-}).catch(error => {
-  console.error('Error initializing WhatsApp client:', error);
+
+app.get('/', (req, res) => {
+  res.send('WhatsApp Bot is running');
+});
+
+app.listen(port, () => {
+  console.log(`Server running on: http://localhost:${port}`);
 });

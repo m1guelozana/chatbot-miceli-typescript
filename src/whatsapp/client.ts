@@ -4,24 +4,25 @@ import handleUserFirstMessage from './messages/first-message';
 
 export async function initializeWhatsAppClient() {
   try {
+    console.log("Initializing WhatsApp client...");
     const client = new Client({
       authStrategy: new LocalAuth(),
       puppeteer: {
-        headless: false,
+        headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
       },
     });
 
     client.on("qr", (qr) => {
-      console.log("QR RECEIVED", qr);
+      console.log("QR RECEIVED");
       qrcode.generate(qr, { small: true });
     });
 
     client.on("ready", () => {
       console.log("WhatsApp Client is ready!");
     });
-
-    client.on("message_create", async (message) => {
+    
+    client.on("message_create", async message => {
       console.log(`Received message from ${message.from}: ${message.body}`);
       if (
         !message.body ||
