@@ -1,6 +1,5 @@
 import express from 'express';
 import { initializeWhatsAppClient } from './whatsapp/client';
-import handleUserFirstMessage from './whatsapp/messages/first-message';
 
 const app = express();
 const port = 3000;
