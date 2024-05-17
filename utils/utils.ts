@@ -1,19 +1,26 @@
-import { Chat, Message } from "whatsapp-web.js";
+import { Chat, Client, Message } from "whatsapp-web.js";
 
-export async function waitForUserChoice(chat: Chat): Promise<string> {
-  console.log("Waiting for user choice...");
-  while (true) {
-    const messages: Message[] = await chat.fetchMessages({ limit: 1 });
-    const userChoice: string = messages[0]?.body?.trim();
-    if (userChoice && ["1", "2", "3", "4"].includes(userChoice)) {
-      console.log(`User choice: ${userChoice}`);
-      return userChoice;
-    }
-    console.log("Invalid choice, waiting...");
-    await sleep(1000);
-  }
+export async function waitForUserChoice(chat: Chat, client: Client): Promise<string> {
+  return new Promise(async (resolve) => {
+    const lastMessageId = (await chat.fetchMessages({ limit: 1 }))[0].id._serialized;
+    console.log("Last message ID:", lastMessageId);
+
+    const listener = async (message: Message) => {
+      if (message.from === chat.id._serialized && message.id._serialized !== lastMessageId) {
+        const userChoice: string = message.body?.trim();
+        if (userChoice && ["1", "2", "3", "4"].includes(userChoice)) {
+          client.removeListener("message", listener);
+          resolve(userChoice);
+        } else {
+          await client.sendMessage(message.from, "Opção Inválida. Por favor, selecione uma opção válida.");
+        }
+      }
+    };
+
+    client.on("message", listener);
+  });
 }
 
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
