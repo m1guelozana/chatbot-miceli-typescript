@@ -1,6 +1,6 @@
-import { Client, LocalAuth } from 'whatsapp-web.js';
-import qrcode from 'qrcode-terminal';
-import handleUserFirstMessage from './messages/first-message';
+import { Client, LocalAuth } from "whatsapp-web.js";
+import qrcode from "qrcode-terminal";
+import handleUserFirstMessage from "./messages/first-message";
 
 export async function initializeWhatsAppClient() {
   try {
@@ -8,13 +8,8 @@ export async function initializeWhatsAppClient() {
     const client = new Client({
       authStrategy: new LocalAuth(),
       puppeteer: {
-        headless: true,
+        headless: false,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      },
-      webVersionCache: {
-        type: "remote",
-        remotePath:
-          "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html",
       },
     });
 
@@ -26,8 +21,8 @@ export async function initializeWhatsAppClient() {
     client.on("ready", () => {
       console.log("WhatsApp Client is ready!");
     });
-    
-    client.on("message_create", async message => {
+
+    client.on("message", async (message) => {
       console.log(`Received message from ${message.from}: ${message.body}`);
       if (
         !message.body ||
