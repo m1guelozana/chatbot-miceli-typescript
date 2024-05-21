@@ -6,9 +6,10 @@ import handleOption3 from "./options/message-option-three";
 import handleOption4 from "./options/message-option-four";
 
 const handleUserFirstMessage = async (client: Client, message: Message) => {
-  const chat = await message.getChat();
   console.log("Handling user first message");
+  const chat = await message.getChat();
 
+  // Enviar a mensagem inicial
   await client.sendMessage(
     message.from,
     "Olá!\nObrigado por entrar em contato conosco. Escolha uma opção para continuarmos.\n[1]\n[2]\n[3]\n[4]"
