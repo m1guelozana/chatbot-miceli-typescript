@@ -7,6 +7,7 @@ export async function waitForUserChoice(chat: Chat, client: Client): Promise<str
 
     const listener = async (message: Message) => {
       try {
+        console.log(`Received message from ${message.from}: ${message.body}`);
         if (message.from === chat.id._serialized && message.id._serialized !== lastMessageId) {
           const userChoice: string = message.body?.trim();
           if (userChoice && ["1", "2", "3", "4"].includes(userChoice)) {
