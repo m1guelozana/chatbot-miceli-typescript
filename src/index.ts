@@ -6,9 +6,10 @@ const port = 8000;
 
 initializeWhatsAppClient().then(client => {
     console.log('WhatsApp client initialized successfully!');
-  }).catch(error => { 
+  
+}).catch(error => { 
     console.error('Error initializing WhatsApp client:', error);
-  });
+});
 
 app.get('/', (req, res) => {
   res.send('WhatsApp Bot is running');

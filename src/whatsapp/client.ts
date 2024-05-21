@@ -10,7 +10,7 @@ export async function initializeWhatsAppClient() {
       puppeteer: {
         headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\Chrome.exe'
+        executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
       },
       webVersion: "2.2409.2",
       webVersionCache: {
@@ -29,18 +29,7 @@ export async function initializeWhatsAppClient() {
       console.log("WhatsApp Client is ready!");
     });
 
-    client.on("message", async (message) => {
-      console.log(`Received message from ${message.from}: ${message.body}`);
-      if (
-        !message.body ||
-        message.type.toLowerCase() == "e2e_notification" ||
-        message.type.toLowerCase() == "ciphertext"
-      ) {
-        console.log("Ignored message type or empty message");
-        return;
-      }
-      await handleUserFirstMessage(client, message);
-    });
+    client.on("message", (message) => handleUserFirstMessage(client, message));
 
     await client.initialize();
     console.log("WhatsApp client initialized successfully!");
