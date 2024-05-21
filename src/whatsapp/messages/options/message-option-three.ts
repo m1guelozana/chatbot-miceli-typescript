@@ -1,35 +1,40 @@
 import { Client, Message } from "whatsapp-web.js";
 import { waitForUserChoice } from "../../../../utils/utils";
+import handleOption2 from "./message-option-two";
+import handleOption3 from "./message-option-three";
 import handleOption4 from "./message-option-four";
 import handleUserFirstMessage from "../first-message";
 
-async function handleOption3(client: Client, message: Message) {
-  const chat = await message.getChat();
-  console.log("Handling option 1");
+const userStates: { [key: string]: string } = {};
 
-  await client.sendMessage(message.from, "Opção número 1.\n[1]4\n[2]voltar");
+async function handleOption1(client: Client, message: Message) {
+    const chatId = message.from;
+    const chat = await message.getChat();
+    console.log("Handling option 1");
 
-  try {
-    const userChoice = await waitForUserChoice(chat, client);
-    console.log(`User choice received in option 1: ${userChoice}`);
+    try {
+        await client.sendMessage(message.from, "Opção número 3.\n[1]4\n[2]Retornar ao início");
 
-    switch (userChoice) {
-      case "1":
-        await chat.sendStateTyping();
-        await handleOption4(client, message);
-        break;
-      case "2":
-        await chat.sendStateTyping();
-        await handleUserFirstMessage(client, message);
-        break;
-      default:
-        await client.sendMessage(message.from, 'Opção Inválida');
-        console.log("Sent invalid option message in option 1");
-        return;
+        const userChoice = await waitForUserChoice(chat, client);
+        console.log(`User choice received in option 1: ${userChoice}`);
+
+        switch (userChoice) {
+            case "1":
+                await chat.sendStateTyping();
+                await handleOption4(client, message);
+                break;
+            case "2":
+              userStates[chatId] = 'initial';
+              await handleUserFirstMessage(client, message);
+              break;
+            default:
+                await client.sendMessage(message.from, 'Opção Inválida');
+                console.log("Sent invalid option message in option 1");
+                return;
+        }
+    } catch (err) {
+        console.error("Error handling option 1:", err);
     }
-  } catch (err) {
-    console.error("Error handling option 1:", err);
-  }
 }
 
-export default handleOption3;
+export default handleOption1;

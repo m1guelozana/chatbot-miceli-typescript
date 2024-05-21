@@ -24,7 +24,7 @@ const handleUserFirstMessage = async (client: Client, message: Message) => {
         // Enviar a mensagem inicial
         await client.sendMessage(
             message.from,
-            "Olá!\nObrigado por entrar em contato conosco. Escolha uma opção para continuarmos.\n[1]\n[2]\n[3]\n[4]"
+            "Olá!\nObrigado por entrar em contato conosco. Escolha uma opção para continuarmos.\n[1]Opção 1\n[2]Opção 2\n[3]Opção 3\n[4]Opção 4\n[5]Retornar ao Início"
         );
 
         // Aguardar a escolha do usuário
@@ -47,6 +47,10 @@ const handleUserFirstMessage = async (client: Client, message: Message) => {
                 break;
             case "4":
                 await handleOption4(client, message);
+                break;
+            case "5":
+                userStates[chatId] = 'initial';
+                await handleUserFirstMessage(client, message);
                 break;
             default:
                 await client.sendMessage(message.from, 'Opção Inválida');

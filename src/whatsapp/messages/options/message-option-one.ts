@@ -3,13 +3,17 @@ import { waitForUserChoice } from "../../../../utils/utils";
 import handleOption2 from "./message-option-two";
 import handleOption3 from "./message-option-three";
 import handleOption4 from "./message-option-four";
+import handleUserFirstMessage from "../first-message";
+
+const userStates: { [key: string]: string } = {};
 
 async function handleOption1(client: Client, message: Message) {
+    const chatId = message.from;
     const chat = await message.getChat();
     console.log("Handling option 1");
 
     try {
-        await client.sendMessage(message.from, "Opção número 1.\n[1]2\n[2]3\n[3]4");
+        await client.sendMessage(message.from, "Opção número 1.\n[1]2\n[2]3\n[3]4\n[4]Retornar ao início");
 
         const userChoice = await waitForUserChoice(chat, client);
         console.log(`User choice received in option 1: ${userChoice}`);
@@ -26,6 +30,10 @@ async function handleOption1(client: Client, message: Message) {
             case "3":
                 await chat.sendStateTyping();
                 await handleOption4(client, message);
+                break;
+            case "4":
+                userStates[chatId] = 'initial';
+                await handleUserFirstMessage(client, message);
                 break;
             default:
                 await client.sendMessage(message.from, 'Opção Inválida');
