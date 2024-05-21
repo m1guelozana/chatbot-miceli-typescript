@@ -6,13 +6,13 @@ import handleUserFirstMessage from "../first-message";
 
 async function handleOption2(client: Client, message: Message) {
   const chat = await message.getChat();
+  console.log("Handling option 1");
 
-  await client.sendMessage(message.from, "Opção número 2. Oi\n[1] 3\n[2] 4\n[3] Voltar");
-  console.log("Sent option 2 message");
+  await client.sendMessage(message.from, "Opção número 2.\n[1]3\n[2]4\n[3]voltar");
 
   try {
     const userChoice = await waitForUserChoice(chat, client);
-    console.log(`User choice received: ${userChoice}`);
+    console.log(`User choice received in option 1: ${userChoice}`);
 
     switch (userChoice) {
       case "1":
@@ -29,11 +29,11 @@ async function handleOption2(client: Client, message: Message) {
         break;
       default:
         await client.sendMessage(message.from, 'Opção Inválida');
-        console.log("Sent invalid option message");
+        console.log("Sent invalid option message in option 1");
         return;
     }
   } catch (err) {
-    console.error("Error handling option 2:", err);
+    console.error("Error handling option 1:", err);
   }
 }
 

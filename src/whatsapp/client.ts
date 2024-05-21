@@ -8,8 +8,15 @@ export async function initializeWhatsAppClient() {
     const client = new Client({
       authStrategy: new LocalAuth(),
       puppeteer: {
-        headless: false,
+        headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\Chrome.exe'
+      },
+      webVersion: "2.2409.2",
+      webVersionCache: {
+        type: "remote",
+        remotePath:
+          "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2409.2.html",
       },
     });
 

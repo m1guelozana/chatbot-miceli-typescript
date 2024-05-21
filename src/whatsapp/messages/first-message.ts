@@ -1,18 +1,14 @@
 import { Client, Message } from 'whatsapp-web.js';
-import { waitForUserChoice } from '../../../utils/utils';
-import handleOption1 from './options/message-option-one';
-import handleOption2 from './options/message-option-two';
-import handleOption3 from './options/message-option-three';
-import handleOption4 from './options/message-option-four';
+import { waitForUserChoice } from "../../../utils/utils";
+import handleOption1 from "./options/message-option-one";
+import handleOption2 from "./options/message-option-two";
+import handleOption3 from "./options/message-option-three";
+import handleOption4 from "./options/message-option-four";
 
+// Adiciona o ouvinte de mensagens apenas uma vez
 const handleUserFirstMessage = async (client: Client, message: Message) => {
   const chat = await message.getChat();
   console.log("Handling user first message");
-
-  if (message.fromMe) {
-    console.log("Ignored message from bot itself");
-    return;
-  }
 
   await client.sendMessage(
     message.from,
@@ -49,5 +45,6 @@ const handleUserFirstMessage = async (client: Client, message: Message) => {
     console.error("Error handling user first message:", err);
   }
 }
+
 
 export default handleUserFirstMessage;

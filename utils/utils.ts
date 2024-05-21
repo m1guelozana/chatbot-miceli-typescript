@@ -1,13 +1,13 @@
-import { Chat, Client, Message } from 'whatsapp-web.js';
+import { Chat, Client, Message } from "whatsapp-web.js";
 
 export async function waitForUserChoice(chat: Chat, client: Client): Promise<string> {
-  const lastMessageId = (await chat.fetchMessages({ limit: 1 }))[0].id._serialized;
-  console.log("Last message ID:", lastMessageId);
+  return new Promise(async (resolve, reject) => {
+    const lastMessageId = (await chat.fetchMessages({ limit: 1 }))[0].id._serialized;
+    console.log("Last message ID:", lastMessageId);
 
-  return new Promise((resolve) => {
     const listener = async (message: Message) => {
       try {
-        if (message.from === chat.id._serialized && message.id._serialized !== lastMessageId && !message.fromMe) {
+        if (message.from === chat.id._serialized && message.id._serialized !== lastMessageId) {
           const userChoice: string = message.body?.trim();
           if (userChoice && ["1", "2", "3", "4"].includes(userChoice)) {
             client.removeListener("message", listener);
@@ -17,9 +17,8 @@ export async function waitForUserChoice(chat: Chat, client: Client): Promise<str
           }
         }
       } catch (error) {
-        console.error("Error in message listener:", error);
         client.removeListener("message", listener);
-        resolve('');
+        reject(error);
       }
     };
 
@@ -28,5 +27,5 @@ export async function waitForUserChoice(chat: Chat, client: Client): Promise<str
 }
 
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
