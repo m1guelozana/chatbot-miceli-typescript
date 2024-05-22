@@ -1,25 +1,32 @@
-import { Client, LocalAuth, Message } from "whatsapp-web.js";
+import { Client, Message, LocalAuth } from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
 import { handleIncomingMessage } from "./messages/incoming-messages";
+import handleUserFirstMessage from "./messages/first-message";
+
 
 let inactivityTimers: { [key: string]: NodeJS.Timeout } = {};
 const INACTIVITY_TIMEOUT = 60000;
 
-async function shutDownByTime(client: Client, chatId: string) {
+export async function shutDownByTime(client: Client, message: Message) {
+    const chatId = message.from;
     clearTimeout(inactivityTimers[chatId]); 
     inactivityTimers[chatId] = setTimeout(() => {
-        restartConversation(client, chatId);
+        restartConversation(client, message);
     }, INACTIVITY_TIMEOUT);
 }
 
-async function restartConversation(client: Client, chatId: string) {
+export async function restartConversation(client: Client, message: Message) {
+    const chatId = message.from;
     console.log(`Restarting conversation with ${chatId}`);
     try {
         clearTimeout(inactivityTimers[chatId]); 
-        delete inactivityTimers[chatId]; // Remove o temporizador de inatividade
+        delete inactivityTimers[chatId]; 
 
-        const chat = await client.getChatById(chatId);
-        await client.sendMessage(chat.id._serialized, 'Oi, você está aí? Caso precise de nós novamente, nos envie uma mensagem e iremos atender você. Obrigado e tenha um bom dia ❤🤗');
+        await client.sendMessage(chatId, 'Oi, você está aí? Caso precise de nós novamente, nos envie uma mensagem e iremos atender você. Obrigado e tenha um bom dia ❤🤗');
+
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        await handleUserFirstMessage(client, message);
     } catch (error) {
         console.error(`Error restarting conversation with ${chatId}:`, error);
     }
@@ -31,7 +38,7 @@ export async function initializeWhatsAppClient() {
     const client = new Client({
       authStrategy: new LocalAuth(),
       puppeteer: {
-        headless: false,
+        headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
         executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
       },
@@ -54,14 +61,13 @@ export async function initializeWhatsAppClient() {
 
     client.on('change_state', state => {
       console.log('Status: ', state );
-    });
+    }); 
 
     client.on('message', async (message) => {
-      shutDownByTime(client, message.from); // Configura o temporizador de inatividade
-      
-      await handleIncomingMessage(client, message);
+      if (message.from !== client.info.wid.user) {
+        await handleIncomingMessage(client, message);
+      }
     });
-
 
     await client.initialize();
     console.log("WhatsApp client initialized successfully!");

@@ -1,5 +1,6 @@
 import { Client, Message } from 'whatsapp-web.js';
 import handleUserFirstMessage from './first-message';
+import { shutDownByTime } from '../client';
 
 export async function handleIncomingMessage(client: Client, message: Message) {
     if (message.from === "status@broadcast" || message.type.toLocaleLowerCase() === "broadcast_notification") {
@@ -11,4 +12,6 @@ export async function handleIncomingMessage(client: Client, message: Message) {
     }
 
     handleUserFirstMessage(client, message);
+
+    shutDownByTime(client, message);
 }
