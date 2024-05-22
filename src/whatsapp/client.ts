@@ -19,7 +19,7 @@ async function restartConversation(client: Client, chatId: string) {
         delete inactivityTimers[chatId]; // Remove o temporizador de inatividade
 
         const chat = await client.getChatById(chatId);
-        await client.sendMessage(chat.id._serialized, 'Olá!\nObrigado por entrar em contato conosco. Escolha uma opção para continuarmos.\n[1]**Conversar com um Especialista**\n[2]**Conversar com setor Financeiro**\n[3]**Conversar com setor de RH**\n[4]**Conversar com setor Comercial**');
+        await client.sendMessage(chat.id._serialized, 'Oi, você está aí? Caso precise de nós novamente, nos envie uma mensagem e iremos atender você. Obrigado e tenha um bom dia ❤🤗');
     } catch (error) {
         console.error(`Error restarting conversation with ${chatId}:`, error);
     }
