@@ -1,14 +1,15 @@
 import { Client, LocalAuth } from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
-import handleUserFirstMessage from "./messages/first-message";
+import { handleIncomingMessage } from "./messages/incoming-messages";
 
 export async function initializeWhatsAppClient() {
+  const botTime = 20000;
   try {
     console.log("Initializing WhatsApp client...");
     const client = new Client({
       authStrategy: new LocalAuth(),
       puppeteer: {
-        headless: true,
+        headless: false,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
         executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
       },
@@ -29,7 +30,12 @@ export async function initializeWhatsAppClient() {
       console.log("WhatsApp Client is ready!");
     });
 
-    client.on("message", (message) => handleUserFirstMessage(client, message));
+    client.on('change_state', state => {
+      console.log('Status: ', state );
+    });
+
+    client.on('message', (message) => handleIncomingMessage(client, message));
+
 
     await client.initialize();
     console.log("WhatsApp client initialized successfully!");
