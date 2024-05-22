@@ -1,4 +1,4 @@
-import { Client, LocalAuth } from "whatsapp-web.js";
+import { Client, LocalAuth, Message } from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
 import { handleIncomingMessage } from "./messages/incoming-messages";
 
@@ -10,14 +10,16 @@ async function shutDownByTime(client: Client, chatId: string) {
     inactivityTimers[chatId] = setTimeout(() => {
         restartConversation(client, chatId);
     }, INACTIVITY_TIMEOUT);
-    const chat = await client.getChatById(chatId);
-    await client.sendMessage(chat.id._serialized, 'Oi, você está aí? Não detectei mais nenhuma atividade sua. Caso precise de mim novamente, envie uma mensagem.')
 }
 
 async function restartConversation(client: Client, chatId: string) {
     console.log(`Restarting conversation with ${chatId}`);
     try {
-        await shutDownByTime(client, chatId);
+        clearTimeout(inactivityTimers[chatId]); 
+        delete inactivityTimers[chatId]; // Remove o temporizador de inatividade
+
+        const chat = await client.getChatById(chatId);
+        await client.sendMessage(chat.id._serialized, 'Olá!\nObrigado por entrar em contato conosco. Escolha uma opção para continuarmos.\n[1]**Conversar com um Especialista**\n[2]**Conversar com setor Financeiro**\n[3]**Conversar com setor de RH**\n[4]**Conversar com setor Comercial**');
     } catch (error) {
         console.error(`Error restarting conversation with ${chatId}:`, error);
     }
@@ -55,10 +57,8 @@ export async function initializeWhatsAppClient() {
     });
 
     client.on('message', async (message) => {
-      clearTimeout(inactivityTimers[message.from]); 
-      inactivityTimers[message.from] = setTimeout(() => {
-          restartConversation(client, message.from);
-      }, INACTIVITY_TIMEOUT);
+      shutDownByTime(client, message.from); // Configura o temporizador de inatividade
+      
       await handleIncomingMessage(client, message);
     });
 
