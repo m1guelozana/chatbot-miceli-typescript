@@ -2,8 +2,28 @@ import { Client, LocalAuth } from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
 import { handleIncomingMessage } from "./messages/incoming-messages";
 
+let inactivityTimers: { [key: string]: NodeJS.Timeout } = {};
+const INACTIVITY_TIMEOUT = 60000;
+
+async function shutDownByTime(client: Client, chatId: string) {
+    clearTimeout(inactivityTimers[chatId]); 
+    inactivityTimers[chatId] = setTimeout(() => {
+        restartConversation(client, chatId);
+    }, INACTIVITY_TIMEOUT);
+    const chat = await client.getChatById(chatId);
+    await client.sendMessage(chat.id._serialized, 'Oi, você está aí? Não detectei mais nenhuma atividade sua. Caso precise de mim novamente, envie uma mensagem.')
+}
+
+async function restartConversation(client: Client, chatId: string) {
+    console.log(`Restarting conversation with ${chatId}`);
+    try {
+        await shutDownByTime(client, chatId);
+    } catch (error) {
+        console.error(`Error restarting conversation with ${chatId}:`, error);
+    }
+}
+
 export async function initializeWhatsAppClient() {
-  const botTime = 20000;
   try {
     console.log("Initializing WhatsApp client...");
     const client = new Client({
@@ -34,7 +54,13 @@ export async function initializeWhatsAppClient() {
       console.log('Status: ', state );
     });
 
-    client.on('message', (message) => handleIncomingMessage(client, message));
+    client.on('message', async (message) => {
+      clearTimeout(inactivityTimers[message.from]); 
+      inactivityTimers[message.from] = setTimeout(() => {
+          restartConversation(client, message.from);
+      }, INACTIVITY_TIMEOUT);
+      await handleIncomingMessage(client, message);
+    });
 
 
     await client.initialize();

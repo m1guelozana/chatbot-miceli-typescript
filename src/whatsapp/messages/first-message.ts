@@ -13,28 +13,20 @@ const handleUserFirstMessage = async (client: Client, message: Message) => {
     console.log("Handling user first message");
 
     if (userStates[chatId] && userStates[chatId] !== 'initial') {
-        // Já lidou com a mensagem inicial, esperar a escolha do usuário
         return;
     }
 
     try {
-        // Definir estado inicial
         userStates[chatId] = 'initial';
-
-        // Enviar a mensagem inicial
         await client.sendMessage(
             message.from,
             "Olá!\nObrigado por entrar em contato conosco. Escolha uma opção para continuarmos.\n[1]**Conversar com um Especialista**\n[2]**Conversar com setor Financeiro**\n[3]**Conversar com setor de RH**\n[4]**Conversar com setor Comercial**"
         );
-
-        // Aguardar a escolha do usuário
         const userChoice = await waitForUserChoice(chat, client);
         console.log(`User choice received: ${userChoice}`);
 
-        // Atualizar estado do usuário
         userStates[chatId] = `option${userChoice}`;
-
-        // Direcionar para a função correspondente à opção selecionada
+        
         switch (userChoice) {
             case "1":
                 await handleOption1(client, message);
