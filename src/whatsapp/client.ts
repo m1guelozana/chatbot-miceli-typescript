@@ -1,7 +1,7 @@
 import { Client, Message, LocalAuth } from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
 import handleUserFirstMessage from "./messages/first-message";
-import { setIsRestarting } from "../../utils/state";
+import { setIsRestarting, clearUserState } from "../../utils/state";
 
 let inactivityTimers: { [key: string]: NodeJS.Timeout } = {};
 const INACTIVITY_TIMEOUT = 60000;
@@ -39,6 +39,7 @@ export async function restartConversation(client: Client, message: Message) {
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     setIsRestarting(false);
+    clearUserState(chatId);
   } catch (error) {
     console.error(`Error restarting conversation with ${chatId}:`, error);
   }

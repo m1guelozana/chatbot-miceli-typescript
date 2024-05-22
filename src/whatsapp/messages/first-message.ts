@@ -4,9 +4,7 @@ import handleOption1 from "./options/message-option-one";
 import handleOption2 from "./options/message-option-two";
 import handleOption3 from "./options/message-option-three";
 import handleOption4 from "./options/message-option-four";
-import { getIsRestarting } from "../../../utils/state";
-
-const userStates: { [key: string]: string } = {};
+import { getIsRestarting, getUserState, setUserState, clearUserState } from "../../../utils/state";
 
 const handleUserFirstMessage = async (client: Client, message: Message) => {
     const chatId = message.from;
@@ -14,16 +12,15 @@ const handleUserFirstMessage = async (client: Client, message: Message) => {
     console.log("Handling user first message");
 
     if (getIsRestarting()) {
-        // Do not process "Opção Inválida" if we are just restarting the conversation
         return;
     }
 
-    if (userStates[chatId] && userStates[chatId] !== 'initial') {
+    if (getUserState(chatId) && getUserState(chatId) !== 'initial') {
         return;
     }
 
     try {
-        userStates[chatId] = 'initial';
+        setUserState(chatId, 'initial');
         await client.sendMessage(
             message.from,
             "Olá!\nObrigado por entrar em contato conosco. Escolha uma opção para continuarmos.\n[1]*Conversar com um Especialista*\n[2]*Conversar com setor Financeiro*\n[3]*Conversar com setor de RH*\n[4]*Conversar com setor Comercial*"
@@ -31,7 +28,7 @@ const handleUserFirstMessage = async (client: Client, message: Message) => {
         const userChoice = await waitForUserChoice(chat, client);
         console.log(`User choice received: ${userChoice}`);
 
-        userStates[chatId] = `option${userChoice}`;
+        setUserState(chatId, `option${userChoice}`);
         
         switch (userChoice) {
             case "1":
