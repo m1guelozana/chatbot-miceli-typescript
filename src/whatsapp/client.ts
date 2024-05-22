@@ -16,21 +16,24 @@ export async function shutDownByTime(client: Client, message: Message) {
 }
 
 export async function restartConversation(client: Client, message: Message) {
-    const chatId = message.from;
-    console.log(`Restarting conversation with ${chatId}`);
-    try {
-        clearTimeout(inactivityTimers[chatId]); 
-        delete inactivityTimers[chatId]; 
+  const chatId = message.from;
+  console.log(`Restarting conversation with ${chatId}`);
+  try {
+      clearTimeout(inactivityTimers[chatId]); 
+      delete inactivityTimers[chatId]; 
 
-        await client.sendMessage(chatId, 'Oi, você está aí? Caso precise de nós novamente, nos envie uma mensagem e iremos atender você. Obrigado e tenha um bom dia ❤🤗');
+      const chat = await client.getChatById(chatId);
+      const pendingMessages = await chat.fetchMessages({ limit: 1 });
+      await Promise.all(pendingMessages.map(msg => msg.delete()));
 
-        await new Promise(resolve => setTimeout(resolve, 2000));
+      await client.sendMessage(chatId, 'Oi, você está aí? Caso precise de nós novamente, nos envie uma mensagem e iremos atender você. Obrigado e tenha um bom dia ❤🤗');
 
-        await handleUserFirstMessage(client, message);
-    } catch (error) {
-        console.error(`Error restarting conversation with ${chatId}:`, error);
-    }
+      await new Promise(resolve => setTimeout(resolve, 2000));
+  } catch (error) {
+      console.error(`Error restarting conversation with ${chatId}:`, error);
+  }
 }
+
 
 export async function initializeWhatsAppClient() {
   try {

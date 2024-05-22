@@ -15,7 +15,7 @@ async function handleOption1(client: Client, message: Message) {
 
   await client.sendMessage(
     message.from,
-    "Você deseja buscar algum outro contato?\n[1]**Conversar com setor Financeiro**\n[2]**Conversar com RH**\n[3]**Conversar com setor Comercial**"
+    "Você deseja buscar algum outro contato?\n[1]*Conversar com setor Financeiro*\n[2]*Conversar com RH*\n[3]*Conversar com setor Comercial*"
   );
 
   const userChoice = await waitForUserChoice(chat, client);
