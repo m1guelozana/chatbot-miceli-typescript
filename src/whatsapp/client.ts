@@ -1,6 +1,7 @@
 import { Client, Message, LocalAuth } from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
 import handleUserFirstMessage from "./messages/first-message";
+import { setIsRestarting } from "../../utils/state";
 
 let inactivityTimers: { [key: string]: NodeJS.Timeout } = {};
 const INACTIVITY_TIMEOUT = 60000;
@@ -12,12 +13,8 @@ export async function shutDownByTime(client: Client, message: Message) {
     inactivityTimers[chatId] = setTimeout(() => {
       restartConversation(client, message);
     }, INACTIVITY_TIMEOUT);
-
-    await restartConversation(client, message);
-
-    await handleUserFirstMessage(client, message);
   } catch (error) {
-    console.error("Error handling incoming message:", error);
+    console.error("Error setting inactivity timer:", error);
   }
 }
 
@@ -27,6 +24,8 @@ export async function restartConversation(client: Client, message: Message) {
   try {
     clearTimeout(inactivityTimers[chatId]);
     delete inactivityTimers[chatId];
+
+    setIsRestarting(true);
 
     const chat = await client.getChatById(chatId);
     const pendingMessages = await chat.fetchMessages({ limit: 1 });
@@ -38,8 +37,17 @@ export async function restartConversation(client: Client, message: Message) {
     );
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    setIsRestarting(false);
   } catch (error) {
     console.error(`Error restarting conversation with ${chatId}:`, error);
+  }
+}
+
+export async function handleIncomingMessage(client: Client, message: Message) {
+  if (message.from !== client.info.wid._serialized) {
+    await shutDownByTime(client, message);
+    await handleUserFirstMessage(client, message);
   }
 }
 
@@ -76,18 +84,19 @@ export async function initializeWhatsAppClient() {
     });
 
     client.on("message", async (message) => {
-      if (message.from !== client.info.wid.user) {
-        await handleUserFirstMessage(client, message);
-      }
-      if (
-        message.from === "status@broadcast" ||
-        message.type.toLocaleLowerCase() === "broadcast_notification"
-      ) {
-        return null;
-      }
+      if (message.from !== client.info.wid._serialized) {
+        if (
+          message.from === "status@broadcast" ||
+          message.type.toLowerCase() === "broadcast_notification"
+        ) {
+          return;
+        }
 
-      if (message.body !== null && !message.from.includes("@c.us")) {
-        return null;
+        if (message.body !== null && !message.from.includes("@c.us")) {
+          return;
+        }
+
+        await handleIncomingMessage(client, message);
       }
     });
 
