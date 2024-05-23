@@ -33,13 +33,18 @@ export async function initializeWhatsAppClient() {
             console.log("WhatsApp Client is ready!");
         });
 
-        client.on("change_state", (state) => {
-          console.log("Connection state:", state);
-          if (state === 'CONNECTED') {
-            console.log("WhatsApp client is now connected!");
-          }
+        client.on("authenticated", () => {
+            console.log("WhatsApp Client authenticated successfully!");
         });
-      
+
+        client.on("auth_failure", (msg) => {
+            console.error("Authentication failure:", msg);
+        });
+
+        client.on("disconnected", (reason) => {
+            console.log("WhatsApp Client disconnected:", reason);
+        });
+
         client.on("message", async (message) => {
             const chatId = message.from;
             activeChats.add(chatId);
@@ -72,10 +77,6 @@ function clearInactivityTimer() {
 }
 
 async function sendInactivityMessages() {
-  if (!client || client.state !== 'CONNECTED') {
-    console.log('Cliente WhatsApp desconectado, pulando envio de mensagens de inatividade.');
-    return;
-  }
     try {
         const inactivityMessage = "Olá! Parece que não houve atividade por um tempo. Se precisar de ajuda, estou aqui para você. 😊";
         for (const chatId of activeChats) {
