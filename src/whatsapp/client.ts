@@ -15,7 +15,7 @@ export async function initializeWhatsAppClient() {
                 headless: true,
                 args: ["--no-sandbox", "--disable-setuid-sandbox"],
                 executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-                timeout: 120000,
+                timeout: 0,
             },
             webVersion: "2.2409.2",
             webVersionCache: {
@@ -34,20 +34,22 @@ export async function initializeWhatsAppClient() {
         });
 
         client.on("change_state", (state) => {
-            console.log("Status: ", state);
+          console.log("Connection state:", state);
+          if (state === 'CONNECTED') {
+            console.log("WhatsApp client is now connected!");
+          }
         });
-
+      
         client.on("message", async (message) => {
             const chatId = message.from;
             activeChats.add(chatId);
             clearInactivityTimer();
             console.log(`Received message from ${chatId}: ${message.body}`);
-            await handleIncomingMessage(client, message); // Verificar se essa linha está correta
+            await handleIncomingMessage(client, message); 
             startInactivityTimer();
         });
 
         await client.initialize();
-        console.log("WhatsApp client initialized successfully!");
     } catch (error) {
         console.error("Error initializing WhatsApp client:", error);
         throw error;
@@ -57,7 +59,7 @@ export async function initializeWhatsAppClient() {
 function startInactivityTimer() {
     inactivityTimer = setTimeout(() => {
         console.log("Inactivity timeout reached. Shutting down the bot...");
-        sendInactivityMessages(); // Enviar mensagem de inatividade
+        sendInactivityMessages();
         client.destroy();
     }, 60000);
 }
@@ -70,6 +72,10 @@ function clearInactivityTimer() {
 }
 
 async function sendInactivityMessages() {
+  if (!client || client.state !== 'CONNECTED') {
+    console.log('Cliente WhatsApp desconectado, pulando envio de mensagens de inatividade.');
+    return;
+  }
     try {
         const inactivityMessage = "Olá! Parece que não houve atividade por um tempo. Se precisar de ajuda, estou aqui para você. 😊";
         for (const chatId of activeChats) {
