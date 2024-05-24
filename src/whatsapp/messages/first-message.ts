@@ -9,19 +9,14 @@ import stateManager from "../../state";
 const handleUserFirstMessage = async (client: Client, message: Message) => {
     const chatId = message.from;
     const chat = await message.getChat();
+    
+    // Verifica se o usuário já está em uma conversa
+    if (stateManager.isUserInConversation(chatId)) {
+        console.log("User is already in a conversation. Skipping welcome message.");
+        return;
+    }
+
     console.log("Handling user first message");
-
-    // Verifica se a mensagem já foi processada
-    const lastMessageId = stateManager.getLastMessageId(chatId);
-    if (lastMessageId === message.id._serialized) {
-        console.log("Mensagem duplicada ignorada:", message.body);
-        return;
-    }
-    stateManager.setLastMessageId(chatId, message.id._serialized);
-
-    if (stateManager.getUserState(chatId) && stateManager.getUserState(chatId) !== 'initial') {
-        return;
-    }
 
     try {
         stateManager.setUserState(chatId, 'initial');
@@ -29,9 +24,11 @@ const handleUserFirstMessage = async (client: Client, message: Message) => {
             message.from,
             "Olá!\nObrigado por entrar em contato conosco. Escolha uma opção para continuarmos.\n[1]*Conversar com um Especialista*\n[2]*Conversar com setor Financeiro*\n[3]*Conversar com setor de RH*\n[4]*Conversar com setor Comercial*"
         );
+        
         const userChoice = await waitForUserChoice(chat, client);
         console.log(`User choice received: ${userChoice}`);
-
+        
+        // Encaminhar para o tratamento da opção selecionada
         switch (userChoice) {
             case "1":
                 stateManager.setUserState(chatId, 'option1');
