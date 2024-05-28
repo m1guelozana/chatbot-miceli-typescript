@@ -32,25 +32,22 @@ const handleUserFirstMessage = async (client: Client, message: Message) => {
         switch (userChoice) {
             case "1":
                 stateManager.setUserState(chatId, 'option1');
-                await handleOption1(client, message);
                 break;
             case "2":
                 stateManager.setUserState(chatId, 'option2');
-                await handleOption2(client, message);
                 break;
             case "3":
                 stateManager.setUserState(chatId, 'option3');
-                await handleOption3(client, message);
                 break;
             case "4":
                 stateManager.setUserState(chatId, 'option4');
-                await handleOption4(client, message);
                 break;
             default:
                 await client.sendMessage(message.from, 'Opção Inválida. Por favor, selecione uma opção válida.');
                 console.log("Sent invalid option message");
                 break;
         }
+        
     } catch (err) {
         console.error("Error handling user first message:", err);
     }

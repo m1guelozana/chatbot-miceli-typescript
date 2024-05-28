@@ -11,7 +11,7 @@ async function handleOption1(client: Client, message: Message) {
   const chat = await message.getChat();
   console.log("Handling option 1");
 
-  let contact = await client.getContactById("5521967620444@c.us");
+  let contact = await client.getContactById("5521986318960@c.us");
   await client.sendMessage(message.from, contact);
 
   await client.sendMessage(
@@ -38,7 +38,7 @@ async function handleOption1(client: Client, message: Message) {
       default:
         await client.sendMessage(message.from, "Opção Inválida");
         console.log("Sent invalid option message in option 1");
-        return;
+        break;
     }
   } catch (err) {
     console.error("Error handling option 1:", err);

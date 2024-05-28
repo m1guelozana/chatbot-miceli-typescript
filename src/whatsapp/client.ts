@@ -89,8 +89,7 @@ export async function initializeWhatsAppClient(): Promise<void> {
         waitUntil: "networkidle0",
       });
 
-      // Adding a delay to ensure everything is loaded properly
-      await delay(5000);
+      await delay(3000);
 
       console.log("Page loaded and ready!");
 
@@ -114,7 +113,7 @@ function startInactivityTimer() {
   inactivityTimer = setTimeout(() => {
     console.log("Inactivity timeout reached. Sending messages...");
     sendInactivityMessages();
-  }, 60000);
+  }, 30000);
   inactivityMessageSent = false;
 }
 
@@ -130,16 +129,11 @@ let inactivityMessageSent = false; // Mantém controle se a mensagem de inativid
 async function sendInactivityMessages() {
     let state = await client?.getState();
     if (!client || state !== WAState.CONNECTED) {
-      // Verificar se a mensagem de inatividade já foi enviada
       if (!inactivityMessageSent) {
-        // Limpar o controle de envio de mensagem de inatividade
         inactivityMessageSent = true;
-  
-        // Iterar sobre os chats ativos
         for (const chatId of activeChats) {
           try {
             const chat = await client.getChatById(chatId);
-            // Verificar se o chat não é um grupo
             if (!chat.isGroup) {
               // Enviar a mensagem de inatividade
               const inactivityMessage =

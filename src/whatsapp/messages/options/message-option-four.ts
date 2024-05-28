@@ -36,7 +36,7 @@ async function handleOption4(client: Client, message: Message) {
       default:
         await client.sendMessage(message.from, "Opção Inválida");
         console.log("Sent invalid option message in option 4");
-        return;
+        break;
     }
   } catch (err) {
     console.error("Error handling option 4:", err);
