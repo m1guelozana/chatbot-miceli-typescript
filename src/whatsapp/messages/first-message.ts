@@ -6,7 +6,6 @@ import handleOption3 from "./options/message-option-three";
 import handleOption4 from "./options/message-option-four";
 
 const handleUserFirstMessage = async (client: Client, message: Message) => {
-    const chatId = message.from;
     const chat = await message.getChat();
     
 

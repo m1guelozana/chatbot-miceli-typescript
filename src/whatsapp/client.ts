@@ -1,6 +1,6 @@
 import { Client, LocalAuth, Message, WAState } from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
-import { handleIncomingMessage } from "./messages/handle-incoming-message"; // Corrigir o caminho para seu projeto
+import handleUserFirstMessage from "./messages/first-message";
 
 let client: Client;
 let inactivityTimer: NodeJS.Timeout | null = null;
@@ -18,7 +18,6 @@ export async function initializeWhatsAppClient(): Promise<void> {
   }
 
   isInitializing = true;
-  try {
     console.log("Step 1: Initializing WhatsApp client...");
     client = new Client({
       authStrategy: new LocalAuth(),
@@ -64,47 +63,21 @@ export async function initializeWhatsAppClient(): Promise<void> {
       activeChats.add(chatId);
       clearInactivityTimer();
       console.log(`Received message from ${chatId}: ${message.body}`);
-      await handleIncomingMessage(client, message);
+      if(chatId.endsWith("@g.us")){
+          return;
+      }
+      await handleUserFirstMessage(client, message)
       startInactivityTimer();
     });
 
     console.log("Step 3: Initializing client...");
     await client.initialize();
+    console.log("Page loaded and ready! Connected");
 
-    console.log("Step 4: Fetching Puppeteer page instance...");
-    const page = await client.pupPage;
-
-    if (page) {
-      console.log("Step 5: Setting up Puppeteer page listeners...");
-      page.on("error", (err) => {
-        console.error("Page error:", err);
-      });
-
-      page.on("close", () => {
-        console.log("Page closed!");
-      });
-
-      console.log("Step 6: Navigating to WhatsApp Web...");
-      await page.goto("https://web.whatsapp.com", {
-        waitUntil: "networkidle0",
-      });
-
-      await delay(3000);
-
-      console.log("Page loaded and ready!");
-
-      client.on("qr", (qr: string) => {
-        console.log("QR RECEIVED");
-        qrcode.generate(qr, { small: true });
-      });
-    } else {
-      console.error("Failed to get the Puppeteer page instance.");
-    }
-  } catch (error) {
-    console.error("Error initializing WhatsApp client:", error);
-    throw error;
-  }
-}
+    client.on("qr", (qr: string) => {
+      console.log("QR RECEIVED");
+      qrcode.generate(qr, { small: true });
+    });
 
 function startInactivityTimer() {
   if (inactivityTimer) {
@@ -135,7 +108,6 @@ async function sendInactivityMessages() {
           try {
             const chat = await client.getChatById(chatId);
             if (!chat.isGroup) {
-              // Enviar a mensagem de inatividade
               const inactivityMessage =
                 "Olá! Parece que não houve atividade por um tempo. Se precisar de ajuda, estou aqui para você. 😊";
               await client.sendMessage(chatId, inactivityMessage);
@@ -148,6 +120,6 @@ async function sendInactivityMessages() {
       }
     }
   }
-  
+}
 
 initializeWhatsAppClient();
