@@ -3,7 +3,6 @@ import { waitForUserChoice } from "../../../../utils/utils";
 import handleOption1 from "./message-option-one";
 import handleOption2 from "./message-option-two";
 import handleOption4 from "./message-option-four";
-import stateManager from "../../../state";
 
 
 async function handleOption3(client: Client, message: Message) {
@@ -42,7 +41,6 @@ async function handleOption3(client: Client, message: Message) {
   } catch (err) {
     console.error("Error handling option 3:", err);
   }
-  stateManager.setUserState(message.from, 'option3');
 }
 
 export default handleOption3;
