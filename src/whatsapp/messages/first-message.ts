@@ -1,15 +1,20 @@
 import { Client, Message } from "whatsapp-web.js";
-import { waitForUserChoice } from "../../../utils/utils";
+import { waitForUserChoice } from "../../../utils/utils"
 import handleOption1 from "./options/message-option-one";
 import handleOption2 from "./options/message-option-two";
 import handleOption3 from "./options/message-option-three";
 import handleOption4 from "./options/message-option-four";
+import { activeChats } from "../../active-chats";
 
 const handleUserFirstMessage = async (client: Client, message: Message) => {
     const chat = await message.getChat();
-    
-
     console.log("Handling user first message");
+
+    if (activeChats.has(message.from)) {
+        return;
+    }
+
+    activeChats.add(message.from);
 
     try {
         await client.sendMessage(
@@ -20,19 +25,18 @@ const handleUserFirstMessage = async (client: Client, message: Message) => {
         const userChoice = await waitForUserChoice(chat, client);
         console.log(`User choice received: ${userChoice}`);
         
-        // Encaminhar para o tratamento da opção selecionada
         switch (userChoice) {
             case "1":
-                await handleOption1(client, message)
+                await handleOption1(client, message);
                 break;
             case "2":
-                await handleOption2(client, message)
+                await handleOption2(client, message);
                 break;
             case "3":
-                await handleOption3(client, message)
+                await handleOption3(client, message);
                 break;
             case "4":
-                await handleOption4(client, message)
+                await handleOption4(client, message);
                 break;
             default:
                 await client.sendMessage(message.from, 'Opção Inválida. Por favor, selecione uma opção válida.');
