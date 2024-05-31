@@ -5,15 +5,18 @@ import handleOption2 from "./options/message-option-two";
 import handleOption3 from "./options/message-option-three";
 import handleOption4 from "./options/message-option-four";
 import { activeChats } from "../../active-chats";
+import { isInSleepMode } from "../client" // Importa o estado de isInSleepMode
 
 const handleUserFirstMessage = async (client: Client, message: Message) => {
     const chat = await message.getChat();
     console.log("Handling user first message");
 
-    if (activeChats.has(message.from)) {
+    // Verifica se o chat está em modo de inatividade
+    if (isInSleepMode.get(message.from)) {
         return;
     }
 
+    // Adiciona o chat à lista de chats ativos
     activeChats.add(message.from);
 
     try {
