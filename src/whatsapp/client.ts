@@ -71,9 +71,6 @@ export async function initializeWhatsAppClient(): Promise<void> {
             return;
         }
     
-        // Atualiza o momento da última interação
-        lastInteractionTimes.set(chatId, currentTime);
-    
         // Verifica se o chat está em modo sleep
         if (isInSleepMode.get(chatId)) {
             console.log("Bot is in sleep mode, sending initial message.");
@@ -82,9 +79,13 @@ export async function initializeWhatsAppClient(): Promise<void> {
             return; // Retorna para evitar o processamento adicional
         }
     
+        // Atualiza o momento da última interação
+        lastInteractionTimes.set(chatId, currentTime);
+    
         console.log("Handling User First Message. New interaction");
         await handleUserFirstMessage(client, message); // Enviando mensagem inicial
     });
+    
     
 
     console.log("Step 3: Initializing client...");
