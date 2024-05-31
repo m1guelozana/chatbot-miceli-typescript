@@ -38,6 +38,7 @@ export async function initializeWhatsAppClient(): Promise<void> {
     client.on("ready", () => {
         console.log("WhatsApp Client is ready!");
         isReady = true;
+        startInactivityCheck();
     });
 
     client.on("authenticated", () => {
@@ -60,24 +61,7 @@ export async function initializeWhatsAppClient(): Promise<void> {
             return;
         }
 
-        const currentTime = new Date();
-        const lastInteractionTime = lastInteractionTimes.get(chatId);
-
-        if (lastInteractionTime) {
-            const timeSinceLastInteraction = currentTime.getTime() - lastInteractionTime.getTime();
-            const inactivityThreshold = 60000; // Limite de inatividade em milissegundos (1 minuto)
-
-            if (timeSinceLastInteraction >= inactivityThreshold) {
-                if (!isInSleepMode.get(chatId)) {
-                    console.log("Inactivity detected, sending inactivity message.");
-                    const inactivityMessage = "Olá! Parece que não houve atividade por um tempo. Se precisar de ajuda, estou aqui para você. 😊";
-                    await client.sendMessage(chatId, inactivityMessage);
-                    isInSleepMode.set(chatId, true); // Entra no modo sleep
-                }
-            }
-        }
-
-        lastInteractionTimes.set(chatId, currentTime); // Atualiza o momento da última interação
+        lastInteractionTimes.set(chatId, new Date()); // Atualiza o momento da última interação
 
         if (isInSleepMode.get(chatId)) {
             console.log("Bot is in sleep mode, sending initial message.");
@@ -97,6 +81,26 @@ export async function initializeWhatsAppClient(): Promise<void> {
         console.log("QR RECEIVED");
         qrcode.generate(qr, { small: true });
     });
+}
+
+function startInactivityCheck() {
+    const inactivityThreshold = 60000; // 1 minuto para teste, ajuste conforme necessário
+    setInterval(async () => {
+        const currentTime = new Date();
+
+        for (const [chatId, lastInteractionTime] of lastInteractionTimes) {
+            const timeSinceLastInteraction = currentTime.getTime() - lastInteractionTime.getTime();
+
+            if (timeSinceLastInteraction >= inactivityThreshold) {
+                if (!isInSleepMode.get(chatId)) {
+                    console.log("Inactivity detected, sending inactivity message.");
+                    const inactivityMessage = "Olá! Parece que não houve atividade por um tempo. Se precisar de ajuda, estou aqui para você. 😊";
+                    await client.sendMessage(chatId, inactivityMessage);
+                    isInSleepMode.set(chatId, true); // Entra no modo sleep
+                }
+            }
+        }
+    }, 30000); // Verifica a cada 30 segundos
 }
 
 initializeWhatsAppClient();

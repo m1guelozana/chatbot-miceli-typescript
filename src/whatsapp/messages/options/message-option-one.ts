@@ -4,14 +4,24 @@ import handleOption2 from "./message-option-two";
 import handleOption3 from "./message-option-three";
 import handleOption4 from "./message-option-four";
 
+const activeChats: Set<string> = new Set(); // Para rastrear chats ativos em atendimento humano
+
 async function handleOption1(client: Client, message: Message) {
     const chat = await message.getChat();
     console.log("Handling option 1");
 
     try {
-        // Obtém o contato do especialista
-        let contact = await client.getContactById("5521986318960@c.us");
-        await client.sendMessage(message.from, contact); // Certifique-se de que está enviando o ID ou a mensagem correta
+        // Pausar o bot para atendimento humano
+        activeChats.add(message.from);
+        await client.sendMessage(message.from, "Você foi transferido para um atendimento humano. Por favor, aguarde.");
+
+        // Esperar o atendimento humano
+        // Aqui você pode adicionar a lógica de espera até o atendimento humano finalizar
+        // Exemplo simples de espera com setTimeout (modifique conforme necessário)
+        await new Promise(resolve => setTimeout(resolve, 60000)); // Espera 1 minuto (modifique conforme necessário)
+
+        // Após o atendimento humano finalizar
+        await client.sendMessage(message.from, "Atendimento Finalizado. Posso te ajudar em mais alguma coisa?");
 
         // Envia a nova mensagem com opções
         await client.sendMessage(
@@ -22,6 +32,9 @@ async function handleOption1(client: Client, message: Message) {
         // Aguarda a escolha do usuário
         const userChoice = await waitForUserChoice(chat, client);
         console.log(`User choice received in option 1: ${userChoice}`);
+
+        // Remove o chat da lista de chats ativos em atendimento humano
+        activeChats.delete(message.from);
 
         // Encaminha para o tratamento da opção selecionada
         switch (userChoice) {
