@@ -15,10 +15,8 @@ async function handleOption1(client: Client, message: Message) {
         activeChats.add(message.from);
         await client.sendMessage(message.from, "Você foi transferido para um atendimento humano. Por favor, aguarde.");
 
-        // Esperar o atendimento humano
-        // Aqui você pode adicionar a lógica de espera até o atendimento humano finalizar
-        // Exemplo simples de espera com setTimeout (modifique conforme necessário)
-        await new Promise(resolve => setTimeout(resolve, 60000)); // Espera 1 minuto (modifique conforme necessário)
+        // Espera pelo atendimento humano finalizar
+        await waitForHumanAssistanceEnd(client, message.from);
 
         // Após o atendimento humano finalizar
         await client.sendMessage(message.from, "Atendimento Finalizado. Posso te ajudar em mais alguma coisa?");
@@ -58,6 +56,20 @@ async function handleOption1(client: Client, message: Message) {
     } catch (err) {
         console.error("Error handling option 1:", err);
     }
+}
+
+async function waitForHumanAssistanceEnd(client: Client, chatId: string) {
+    return new Promise<void>((resolve) => {
+        const interval = setInterval(async () => {
+            const messages = await client.getChatById(chatId).then(chat => chat.fetchMessages({ limit: 10 }));
+            const humanEnded = messages.some(msg => msg.body.toLowerCase() === "atendimento encerrado");
+
+            if (humanEnded) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 5000); // Verifica a cada 5 segundos
+    });
 }
 
 export default handleOption1;

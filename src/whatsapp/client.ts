@@ -61,7 +61,32 @@ export async function initializeWhatsAppClient(): Promise<void> {
             return;
         }
 
-        lastInteractionTimes.set(chatId, new Date()); // Atualiza o momento da última interação
+        const currentTime = new Date();
+        const lastInteractionTime = lastInteractionTimes.get(chatId);
+
+        // Se o atendente humano enviar "Atendimento encerrado", sair do modo sleep
+        if (message.body.toLowerCase() === "atendimento encerrado") {
+            isInSleepMode.set(chatId, false);
+            await client.sendMessage(chatId, "Atendimento encerrado. Se precisar de mais ajuda, estou aqui.");
+            return;
+        }
+
+        // Se não houver interação por um tempo, enviar mensagem de inatividade e entrar no modo sleep
+        if (lastInteractionTime) {
+            const timeSinceLastInteraction = currentTime.getTime() - lastInteractionTime.getTime();
+            const inactivityThreshold = 60000; // Ajuste conforme necessário
+
+            if (timeSinceLastInteraction >= inactivityThreshold) {
+                if (!isInSleepMode.get(chatId)) {
+                    console.log("Inactivity detected, sending inactivity message.");
+                    const inactivityMessage = "Olá! Parece que não houve atividade por um tempo. Se precisar de ajuda, estou aqui para você. 😊";
+                    await client.sendMessage(chatId, inactivityMessage);
+                    isInSleepMode.set(chatId, true); // Entra no modo sleep
+                }
+            }
+        }
+
+        lastInteractionTimes.set(chatId, currentTime); // Atualiza o momento da última interação
 
         if (isInSleepMode.get(chatId)) {
             console.log("Bot is in sleep mode, sending initial message.");
