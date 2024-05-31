@@ -56,34 +56,36 @@ export async function initializeWhatsAppClient(): Promise<void> {
 
     client.on("message", async (message: Message) => {
         const chatId = message.from;
-
+    
         if (chatId.endsWith("@g.us")) {
             return;
         }
-
+    
         const currentTime = new Date();
         const lastInteractionTime = lastInteractionTimes.get(chatId);
-
+    
         // Se o atendente humano enviar "Atendimento encerrado", sair do modo sleep
         if (message.body.toLowerCase() === "atendimento encerrado") {
             isInSleepMode.set(chatId, false);
             await client.sendMessage(chatId, "Atendimento encerrado. Se precisar de mais ajuda, estou aqui.");
             return;
         }
-
+    
         // Atualiza o momento da última interação
         lastInteractionTimes.set(chatId, currentTime);
-
+    
         // Verifica se o chat está em modo sleep
         if (isInSleepMode.get(chatId)) {
             console.log("Bot is in sleep mode, sending initial message.");
             await handleUserFirstMessage(client, message);
             isInSleepMode.set(chatId, false); // Saindo do modo sleep
-        } else {
-            console.log("Handling User First Message. New interaction");
-            await handleUserFirstMessage(client, message); // Enviando mensagem inicial
+            return; // Retorna para evitar o processamento adicional
         }
+    
+        console.log("Handling User First Message. New interaction");
+        await handleUserFirstMessage(client, message); // Enviando mensagem inicial
     });
+    
 
     console.log("Step 3: Initializing client...");
     await client.initialize();
