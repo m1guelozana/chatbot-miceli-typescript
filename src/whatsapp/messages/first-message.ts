@@ -25,6 +25,13 @@ const handleUserFirstMessage = async (client: Client, message: Message) => {
         const userChoice = await waitForUserChoice(chat, client);
         console.log(`User choice received: ${userChoice}`);
         
+        // Adiciona lógica para verificar se a escolha do usuário é válida
+        if (!["1", "2", "3", "4"].includes(userChoice)) {
+            await client.sendMessage(message.from, 'Opção inválida. Por favor, selecione uma opção válida.');
+            console.log("Sent invalid option message");
+            return;
+        }
+
         switch (userChoice) {
             case "1":
                 await handleOption1(client, message);
@@ -39,13 +46,14 @@ const handleUserFirstMessage = async (client: Client, message: Message) => {
                 await handleOption4(client, message);
                 break;
             default:
-                await client.sendMessage(message.from, 'Opção Inválida. Por favor, selecione uma opção válida.');
-                console.log("Sent invalid option message");
+                // Isso não deve acontecer devido à verificação anterior
                 break;
         }
         
     } catch (err) {
         console.error("Error handling user first message:", err);
+    } finally {
+        activeChats.delete(message.from); // Remove chat da lista de chats ativos após o processamento
     }
 };
 
