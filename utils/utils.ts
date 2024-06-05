@@ -1,31 +1,14 @@
-import { Chat, Client, Message } from "whatsapp-web.js";
+import { Client, Chat, Message } from "whatsapp-web.js";
 
-export async function waitForUserChoice(chat: Chat, client: Client): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const lastMessageId = (await chat.fetchMessages({ limit: 1 }))[0].id._serialized;
-            console.log("Last message ID:", lastMessageId);
+export const waitForUserChoice = (chat: Chat, client: Client): Promise<string> => {
+    return new Promise((resolve) => {
+        const messageListener = async (message: Message) => {
+            if (message.from === chat.id._serialized) {
+                client.removeListener("message", messageListener);
+                resolve(message.body);
+            }
+        };
 
-            const listener = async (message: Message) => {
-                try {
-                    if (message.from === chat.id._serialized && message.id._serialized !== lastMessageId) {
-                        const userChoice: string = message.body?.trim();
-                        if (userChoice && ["1", "2", "3", "4"].includes(userChoice)) {
-                            client.removeListener("message", listener); // Remove the listener after capturing the choice
-                            resolve(userChoice);
-                        } else {
-                            await client.sendMessage(message.from, "Opção Inválida. Por favor, selecione uma opção válida.");
-                        }
-                    }
-                } catch (error) {
-                    client.removeListener("message", listener); // Remove the listener in case of error
-                    reject(error);
-                }
-            };
-
-            client.on("message", listener);
-        } catch (error) {
-            reject(error);
-        }
+        client.on("message", messageListener);
     });
-}
+};

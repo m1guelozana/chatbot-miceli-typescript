@@ -1,4 +1,2 @@
-// active-chats.ts
-export const activeChats: Set<string> = new Set();
-export const lastInteractionTimes: Map<string, Date> = new Map();
-
+export const activeChats = new Set<string>();
+export const lastInteractionTimes = new Map<string, Date>();

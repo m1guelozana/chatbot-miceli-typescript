@@ -55,24 +55,7 @@ export async function initializeWhatsAppClient(): Promise<void> {
     });
 
     client.on("message", async (message: Message) => {
-        // Chamando a função handleIncomingMessage para processar a mensagem
-        await handleIncomingMessage(client, message);
-    });
-
-    console.log("Step 3: Initializing client...");
-    await client.initialize();
-    console.log("Page loaded and ready! Connected");
-
-    client.on("qr", (qr: string) => {
-        console.log("QR RECEIVED");
-        qrcode.generate(qr, { small: true });
-    });
-}
-
-async function handleIncomingMessage(client: Client, message: Message) {
-    try {
         const chatId = message.from;
-        console.log("Received message:", message.body);
 
         if (chatId.endsWith("@g.us")) {
             return;
@@ -93,9 +76,16 @@ async function handleIncomingMessage(client: Client, message: Message) {
             console.log("Handling User First Message. New interaction");
             await handleUserFirstMessage(client, message); // Enviando mensagem inicial
         }
-    } catch (error) {
-        console.error("Error processing message:", error);
-    }
+    });
+
+    console.log("Step 3: Initializing client...");
+    await client.initialize();
+    console.log("Page loaded and ready! Connected");
+
+    client.on("qr", (qr: string) => {
+        console.log("QR RECEIVED");
+        qrcode.generate(qr, { small: true });
+    });
 }
 
 function startInactivityCheck() {

@@ -1,22 +1,20 @@
 import { Client, Message } from "whatsapp-web.js";
-import { waitForUserChoice } from "../../../utils/utils"
+import { waitForUserChoice } from "../../../utils/utils";
 import handleOption1 from "./options/message-option-one";
 import handleOption2 from "./options/message-option-two";
 import handleOption3 from "./options/message-option-three";
 import handleOption4 from "./options/message-option-four";
 import { activeChats } from "../../active-chats";
-import { isInSleepMode } from "../client" // Importa o estado de isInSleepMode
+import { isInSleepMode } from "../client"; // Importa o estado do modo sleep
 
 const handleUserFirstMessage = async (client: Client, message: Message) => {
     const chat = await message.getChat();
     console.log("Handling user first message");
 
-    // Verifica se o chat está em modo de inatividade
-    if (isInSleepMode.get(message.from)) {
+    if (activeChats.has(message.from)) {
         return;
     }
 
-    // Adiciona o chat à lista de chats ativos
     activeChats.add(message.from);
 
     try {
@@ -32,6 +30,7 @@ const handleUserFirstMessage = async (client: Client, message: Message) => {
         if (!["1", "2", "3", "4"].includes(userChoice)) {
             await client.sendMessage(message.from, 'Opção inválida. Por favor, selecione uma opção válida.');
             console.log("Sent invalid option message");
+            activeChats.delete(message.from);
             return;
         }
 
