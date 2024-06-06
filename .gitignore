@@ -9,6 +9,7 @@ lerna-debug.log*
 
 # Ignore .wwebjs_auth file
 .wwebjs_auth
+.wwebjs_cache
 
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
