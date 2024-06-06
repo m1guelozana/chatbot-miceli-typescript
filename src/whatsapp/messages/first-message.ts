@@ -12,6 +12,7 @@ const handleUserFirstMessage = async (client: Client, message: Message | null) =
     console.log("Handling user first message");
 
     if (message && activeChats.has(message.from)) {
+        console.log(`Chat ${message.from} is already active.`);
         return;
     }
 
@@ -21,6 +22,7 @@ const handleUserFirstMessage = async (client: Client, message: Message | null) =
 
     try {
         if (message) {
+            console.log(`Sending initial message to chat ${message.from}`);
             await client.sendMessage(
                 message.from,
                 "Olá!\nObrigado por entrar em contato conosco. Escolha uma opção para continuarmos.\n[1]*Conversar com um Especialista*\n[2]*Conversar com setor Financeiro*\n[3]*Conversar com setor de RH*\n[4]*Conversar com setor de Acordo*"
@@ -29,12 +31,12 @@ const handleUserFirstMessage = async (client: Client, message: Message | null) =
         
         if (message) {
             const userChoice = await waitForUserChoice(chat!, client);
-            console.log(`User choice received: ${userChoice}`);
+            console.log(`User choice received from chat ${message.from}: ${userChoice}`);
             
             // Adiciona lógica para verificar se a escolha do usuário é válida
             if (!["1", "2", "3", "4"].includes(userChoice)) {
                 await client.sendMessage(message.from, 'Opção inválida. Por favor, selecione uma opção válida.');
-                console.log("Sent invalid option message");
+                console.log(`Sent invalid option message to chat ${message.from}`);
                 activeChats.delete(message.from);
                 return;
             }
@@ -57,8 +59,6 @@ const handleUserFirstMessage = async (client: Client, message: Message | null) =
                     break;
             }
         } else {
-            // Lógica para lidar com o reinício da interação
-            // Por exemplo, enviar a mensagem inicial novamente ou realizar outra ação necessária
             console.log("No message provided, restarting interaction...");
             // Implemente a lógica necessária aqui, como enviar a mensagem inicial novamente
         }
@@ -67,10 +67,10 @@ const handleUserFirstMessage = async (client: Client, message: Message | null) =
         console.error("Error handling user first message:", err);
     } finally {
         if (message) {
+            console.log(`Removing chat ${message.from} from active chats`);
             activeChats.delete(message.from); // Remove chat da lista de chats ativos após o processamento
         }
     }
 };
-
 
 export default handleUserFirstMessage;
