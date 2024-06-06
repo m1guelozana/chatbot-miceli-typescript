@@ -1,7 +1,7 @@
 import { Client, LocalAuth, Message } from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
 import handleUserFirstMessage from "./messages/first-message";
-import { lastInteractionTimes } from "../active-chats";
+import { lastInteractionTimes, activeChats } from "../active-chats";
 
 let client: Client;
 let isReady = false;
@@ -60,20 +60,18 @@ export async function initializeWhatsAppClient(): Promise<void> {
         }
 
         const currentTime = new Date();
-        // const lastInteractionTime = lastInteractionTimes.get(chatId);
+        const lastInteractionTime = lastInteractionTimes.get(chatId);
 
         // Atualiza o momento da última interação
         lastInteractionTimes.set(chatId, currentTime);
 
-        // Verifica se o chat está em modo sleep
         if (isInSleepMode.get(chatId)) {
             console.log(`Bot is in sleep mode for chat ${chatId}, handling user first message...`);
             isInSleepMode.set(chatId, false); // Saindo do modo sleep
-            await handleUserFirstMessage(client, message); // Enviando mensagem inicial
-        } else {
-            console.log(`Handling User First Message for chat ${chatId}. New interaction`);
-            await handleUserFirstMessage(client, message); // Enviando mensagem inicial
         }
+
+        console.log(`Handling User First Message for chat ${chatId}. New interaction`);
+        await handleUserFirstMessage(client, message); // Enviando mensagem inicial
     });
 
     console.log("Step 3: Initializing client...");
