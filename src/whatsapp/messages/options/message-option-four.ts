@@ -8,7 +8,7 @@ async function handleOption4(client: Client, message: Message) {
   const chat = await message.getChat();
   console.log("Handling option 4");
 
-  let contact = await client.getContactById("5521979504616@c.us");
+  let contact = await client.getContactById("5521960177956@c.us");
   await client.sendMessage(message.from, contact);
 
   await client.sendMessage(

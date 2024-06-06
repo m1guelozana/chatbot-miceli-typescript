@@ -19,10 +19,8 @@ export async function initializeWhatsAppClient(): Promise<void> {
     client = new Client({
         authStrategy: new LocalAuth(),
         puppeteer: {
-            headless: true,
+            headless: false,
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
-            executablePath:
-                "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
             timeout: 0,
         },
         webVersion: "2.2409.2",
@@ -69,9 +67,9 @@ export async function initializeWhatsAppClient(): Promise<void> {
 
         // Verifica se o chat está em modo sleep
         if (isInSleepMode.get(chatId)) {
-            console.log("Bot is in sleep mode, sending initial message.");
-            await handleUserFirstMessage(client, message);
+            console.log("Bot is in sleep mode, handling user first message...");
             isInSleepMode.set(chatId, false); // Saindo do modo sleep
+            await handleUserFirstMessage(client, message); // Enviando mensagem inicial
         } else {
             console.log("Handling User First Message. New interaction");
             await handleUserFirstMessage(client, message); // Enviando mensagem inicial
@@ -98,10 +96,14 @@ function startInactivityCheck() {
 
             if (timeSinceLastInteraction >= inactivityThreshold) {
                 if (!isInSleepMode.get(chatId)) {
-                    console.log("Inactivity detected, sending inactivity message.");
+                    console.log("Inactivity detected, setting chat to sleep mode.");
+
+                    // Marca o chat como em modo de inatividade
+                    isInSleepMode.set(chatId, true);
+
+                    // Envie a mensagem de inatividade
                     const inactivityMessage = "Olá! Parece que não houve atividade por um tempo. Se precisar de ajuda, estou aqui para você. 😊";
                     await client.sendMessage(chatId, inactivityMessage);
-                    isInSleepMode.set(chatId, true); // Entra no modo sleep
                 }
             }
         }
